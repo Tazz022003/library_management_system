@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+database.db
+.env
+# CREATE USERS TABLE
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL
+)
+''')
+# DEFAULT ADMIN ACCOUNT
+cursor.execute("""
+INSERT INTO users (username, password)
+SELECT 'admin', 'admin123'
+WHERE NOT EXISTS (
+    SELECT 1 FROM users WHERE username = 'admin'
+)
+""")

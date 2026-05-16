@@ -1,7 +1,63 @@
-from flask import Flask, render_template, request, redirect
+
+from flask import Flask, render_template, request, redirect, session
 import sqlite3
+from functools import wraps
 
 app = Flask(__name__)
+app.secret_key = 'library_secret_key'
+
+# LOGIN REQUIRED
+def login_required(f):
+
+    @wraps(f)
+
+    def decorated_function(*args, **kwargs):
+
+        if 'user' not in session:
+            return redirect('/login')
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+
+# LOGIN
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+    if request.method == 'POST':
+
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        SELECT * FROM users
+        WHERE username = ? AND password = ?
+        """, (username, password))
+
+        user = cursor.fetchone()
+
+        conn.close()
+
+        if user:
+
+            session['user'] = user[1]
+
+            return redirect('/')
+
+    return render_template('login.html')
+
+# LOGOUT
+@app.route('/logout')
+def logout():
+
+    session.pop('user', None)
+
+    return redirect('/login')
 
 # DASHBOARD
 @app.route('/')
