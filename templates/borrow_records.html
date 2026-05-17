@@ -22,8 +22,10 @@
                     <th>ID</th>
                     <th>Student</th>
                     <th>Book</th>
-                    <th>Date</th>
+                    <th>Borrow Date</th>
+                    <th>Due Date</th>
                     <th>Status</th>
+                    <th>Penalty</th>
                     <th>Action</th>
                 </tr>
 
@@ -38,12 +40,49 @@
                     <td>{{ record[0] }}</td>
                     <td>{{ record[1] }}</td>
                     <td>{{ record[3] }}</td>
+
+                    <!-- BORROW DATE -->
                     <td>{{ record[4] }}</td>
+
+                    <!-- DUE DATE -->
                     <td>{{ record[5] }}</td>
 
+                    <!-- STATUS -->
+                    <td>{{ record[6] }}</td>
+
+                    <!-- PENALTY -->
                     <td>
 
-                        {% if record[5] == 'Borrowed' %}
+                        {% if record[6] == 'Borrowed' %}
+
+                            {% if record[5] < current_date %}
+
+                                <span class="badge bg-danger">
+                                    Overdue
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-success">
+                                    No Penalty
+                                </span>
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <span class="badge bg-secondary">
+                                Returned
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- ACTION -->
+                    <td>
+
+                        {% if record[6] == 'Borrowed' %}
 
                         <a
                             href="/return_book/{{ record[0] }}"

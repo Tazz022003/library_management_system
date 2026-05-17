@@ -4,6 +4,26 @@ conn = sqlite3.connect('database.db')
 
 cursor = conn.cursor()
 
+# CREATE USERS TABLE
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fullname TEXT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL
+)
+''')
+
+# DEFAULT ADMIN ACCOUNT
+cursor.execute("""
+INSERT INTO users (fullname, username, password, role)
+SELECT 'Administrator', 'admin', 'admin123', 'admin'
+WHERE NOT EXISTS (
+    SELECT 1 FROM users WHERE username = 'admin'
+)
+""")
+
 # CREATE BOOKS TABLE
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS books (
@@ -23,9 +43,11 @@ CREATE TABLE IF NOT EXISTS borrow_books (
     book_id INTEGER NOT NULL,
     book_title TEXT NOT NULL,
     borrow_date TEXT NOT NULL,
+    due_date TEXT NOT NULL,
     status TEXT NOT NULL
 )
 ''')
+
 
 conn.commit()
 conn.close()
