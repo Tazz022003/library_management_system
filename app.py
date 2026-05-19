@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, redirect, session
 import sqlite3
 from functools import wraps
 from datetime import datetime, timedelta
+from flask import make_response
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = 'library_secret_key'
@@ -381,6 +384,68 @@ def student_dashboard():
         'student_dashboard.html',
         books=books
     )
+# PDF REPORT
+@app.route('/generate_report')
+@login_required
+def generate_report():
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT * FROM borrow_books
+    """)
+
+    records = cursor.fetchall()
+
+    conn.close()
+
+    # CREATE PDF
+    buffer = BytesIO()
+
+    p = canvas.Canvas(buffer)
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(200, 800, "Library Borrow Report")
+
+    y = 760
+
+    p.setFont("Helvetica", 11)
+
+    for record in records:
+
+        text = (
+            f"Student: {record[1]} | "
+            f"Book: {record[3]} | "
+            f"Borrow Date: {record[4]} | "
+            f"Due Date: {record[5]} | "
+            f"Status: {record[6]}"
+        )
+
+        p.drawString(40, y, text)
+
+        y -= 25
+
+        # NEW PAGE IF FULL
+        if y < 50:
+
+            p.showPage()
+
+            y = 800
+
+    p.save()
+
+    buffer.seek(0)
+
+    response = make_response(buffer.getvalue())
+
+    response.headers['Content-Type'] = 'application/pdf'
+
+    response.headers['Content-Disposition'] = (
+        'inline; filename=library_report.pdf'
+    )
+
+    return response
 
 
 if __name__ == '__main__':
