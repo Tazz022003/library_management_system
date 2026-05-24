@@ -5,8 +5,14 @@ from datetime import datetime, timedelta
 from flask import make_response
 from reportlab.pdfgen import canvas
 from io import BytesIO
+import qrcode
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = 'library_secret_key'
 
 # LOGIN REQUIRED
@@ -144,13 +150,36 @@ def add_book():
         category = request.form['category']
         quantity = request.form['quantity']
 
+        # IMAGE UPLOAD
+        image = request.files['cover_image']
+
+        filename = ''
+
+        if image and image.filename != '':
+
+            filename = secure_filename(image.filename)
+
+            image.save(
+                os.path.join(
+                    app.config['UPLOAD_FOLDER'],
+                    filename
+                )
+            )
+
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
 
         cursor.execute("""
-        INSERT INTO books (title, author, category, quantity)
-        VALUES (?, ?, ?, ?)
-        """, (title, author, category, quantity))
+        INSERT INTO books
+        (title, author, category, quantity, cover_image)
+        VALUES (?, ?, ?, ?, ?)
+        """, (
+            title,
+            author,
+            category,
+            quantity,
+            filename
+        ))
 
         conn.commit()
         conn.close()
@@ -158,7 +187,6 @@ def add_book():
         return redirect('/books')
 
     return render_template('add_book.html')
-
 
 # DELETE BOOK
 @app.route('/delete_book/<int:id>')
@@ -384,6 +412,7 @@ def student_dashboard():
         'student_dashboard.html',
         books=books
     )
+
 # PDF REPORT
 @app.route('/generate_report')
 @login_required

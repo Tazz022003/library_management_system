@@ -14,7 +14,19 @@
 
         <h1 class="mb-4">Add Book</h1>
 
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
+
+             <div class="mb-3">
+
+                 <label>Book Cover</label>
+
+                <input
+                   type="file"
+                   name="cover_image"
+                  class="form-control"
+                >
+
+            </div>
 
             <div class="mb-3">
                 <label>Book Title</label>

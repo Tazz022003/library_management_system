@@ -9,6 +9,7 @@
 
         body{
             background:#f4f6f9;
+            font-family:Arial, sans-serif;
         }
 
         .sidebar{
@@ -24,15 +25,33 @@
             display:block;
             padding:15px;
             text-decoration:none;
+            transition:0.3s;
         }
 
         .sidebar a:hover{
             background:#343a40;
+            padding-left:20px;
         }
 
         .content{
             margin-left:260px;
             padding:30px;
+        }
+
+        .card{
+            border:none;
+            border-radius:12px;
+        }
+
+        .table img{
+            border-radius:8px;
+            object-fit:cover;
+        }
+
+        .badge-stock{
+            padding:8px 12px;
+            border-radius:20px;
+            font-size:12px;
         }
 
     </style>
@@ -41,6 +60,7 @@
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
 
     <h3 class="text-white text-center mb-4">
@@ -51,25 +71,30 @@
     <a href="/books">Books</a>
     <a href="/add_book">Add Book</a>
     <a href="/borrow_records">Borrow Records</a>
+    <a href="/generate_report">PDF Reports</a>
     <a href="/logout">Logout</a>
 
 </div>
 
+<!-- CONTENT -->
 <div class="content">
 
-    <div class="d-flex justify-content-between mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <h1>Books List</h1>
+        <h1 class="fw-bold">
+            Books List
+        </h1>
 
-        <a href="/add_book" class="btn btn-primary">
+        <a href="/add_book" class="btn btn-primary px-4 py-2">
             Add Book
         </a>
 
     </div>
 
-    <form method="GET" class="mb-3">
+    <!-- SEARCH -->
+    <form method="GET" class="mb-4">
 
-        <div class="input-group">
+        <div class="input-group shadow-sm">
 
             <input
                 type="text"
@@ -86,19 +111,21 @@
 
     </form>
 
-    <div class="card shadow p-3">
+    <!-- BOOK TABLE -->
+    <div class="card shadow p-4">
 
-        <table class="table table-hover">
+        <table class="table table-hover align-middle">
 
             <thead class="table-dark">
 
                 <tr>
                     <th>ID</th>
+                    <th>Cover</th>
                     <th>Title</th>
                     <th>Author</th>
                     <th>Category</th>
                     <th>Quantity</th>
-                    <th>Actions</th>
+                    <th width="220">Actions</th>
                 </tr>
 
             </thead>
@@ -109,21 +136,84 @@
 
                 <tr>
 
+                    <!-- ID -->
                     <td>{{ book[0] }}</td>
-                    <td>{{ book[1] }}</td>
-                    <td>{{ book[2] }}</td>
-                    <td>{{ book[3] }}</td>
-                    <td>{{ book[4] }}</td>
 
+                    <!-- COVER -->
                     <td>
 
-                        </a>
+                        {% if book[5] %}
+
+                        <img
+                            src="{{ url_for('static', filename='uploads/' + book[5]) }}"
+                            width="60"
+                            height="80"
+                        >
+
+                        {% else %}
+
+                        <img
+                            src="https://via.placeholder.com/60x80?text=No+Image"
+                            width="60"
+                            height="80"
+                        >
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- TITLE -->
+                    <td class="fw-semibold">
+                        {{ book[1] }}
+                    </td>
+
+                    <!-- AUTHOR -->
+                    <td>{{ book[2] }}</td>
+
+                    <!-- CATEGORY -->
+                    <td>{{ book[3] }}</td>
+
+                    <!-- QUANTITY -->
+                    <td>
+
+                        {% if book[4] > 0 %}
+
+                        <span class="badge bg-success badge-stock">
+                            {{ book[4] }} Available
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge bg-danger badge-stock">
+                            Out of Stock
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td>
+
+                        {% if book[4] > 0 %}
+
                         <a
                            href="/borrow_book/{{ book[0] }}"
                            class="btn btn-primary btn-sm"
                         >
                            Borrow
                         </a>
+
+                        {% else %}
+
+                        <button
+                            class="btn btn-secondary btn-sm"
+                            disabled
+                        >
+                            Out of Stock
+                        </button>
+
+                        {% endif %}
 
                         <a
                             href="/edit_book/{{ book[0] }}"
@@ -139,7 +229,6 @@
                         >
                             Delete
                         </a>
-                        
 
                     </td>
 
