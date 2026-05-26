@@ -136,7 +136,25 @@ def books():
         'books.html',
         books=books
     )
+@app.route('/book/<int:id>')
+def book_details(id):
 
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM books WHERE id = ?",
+        (id,)
+    )
+
+    book = cursor.fetchone()
+
+    conn.close()
+
+    return render_template(
+        'book_details.html',
+        book=book
+    )
 
 # ADD BOOK
 @app.route('/add_book', methods=['GET', 'POST'])
@@ -182,6 +200,23 @@ def add_book():
         ))
 
         conn.commit()
+
+        # GET LAST INSERTED BOOK ID
+        book_id = cursor.lastrowid
+
+        # GENERATE QR CODE
+        #qr = qrcode.make(
+       #     f"http://127.0.0.1:5000/book/{book_id}"
+       # )
+        qr = qrcode.make(
+            f"http://192.168.1.5:5000/book/{book_id}"
+        )
+
+        # SAVE QR IMAGE
+        qr.save(
+            f"static/qr_codes/book_{book_id}.png"
+        )
+
         conn.close()
 
         return redirect('/books')
@@ -320,14 +355,47 @@ def borrow_records():
     conn.close()
 
     # CURRENT DATE
-    current_date = datetime.now().strftime('%Y-%m-%d')
+    current_date = datetime.now()
+
+    updated_records = []
+
+    for record in records:
+
+        due_date = datetime.strptime(record[5], '%Y-%m-%d')
+
+        late_days = 0
+        penalty = 0
+        status = record[6]
+
+        # CHECK OVERDUE
+        if (
+            current_date > due_date
+            and status == 'Borrowed'
+        ):
+
+            late_days = (
+                current_date - due_date
+            ).days
+
+            penalty = late_days * 5
+
+            status = 'Overdue'
+
+        updated_records.append({
+            'id': record[0],
+            'student': record[1],
+            'book': record[3],
+            'borrow_date': record[4],
+            'due_date': record[5],
+            'status': status,
+            'late_days': late_days,
+            'penalty': penalty
+        })
 
     return render_template(
         'borrow_records.html',
-        records=records,
-        current_date=current_date
+        records=updated_records
     )
-
 
 # RETURN BOOK
 @app.route('/return_book/<int:id>')
@@ -478,4 +546,4 @@ def generate_report():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
