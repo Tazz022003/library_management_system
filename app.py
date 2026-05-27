@@ -77,7 +77,7 @@ def logout():
     return redirect('/login')
 
 
-# DASHBOARD
+# DASHBOARD/Index route
 @app.route('/')
 @login_required
 def index():
@@ -103,13 +103,44 @@ def index():
     """)
     returned_books = cursor.fetchone()[0]
 
+    # RECENT ACTIVITIES
+    cursor.execute("""
+    SELECT * FROM activities
+    ORDER BY id DESC
+    LIMIT 5
+    """)
+    activities = cursor.fetchall()
+
     conn.close()
 
     return render_template(
         'index.html',
         total_books=total_books,
         borrowed_books=borrowed_books,
-        returned_books=returned_books
+        returned_books=returned_books,
+        activities=activities
+    )
+
+# ADMIN PROFILE
+@app.route('/profile')
+@login_required
+def profile():
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT * FROM users
+    WHERE username = ?
+    """, (session['user'],))
+
+    user = cursor.fetchone()
+
+    conn.close()
+
+    return render_template(
+        'profile.html',
+        user=user
     )
 
 
@@ -136,6 +167,7 @@ def books():
         'books.html',
         books=books
     )
+
 @app.route('/book/<int:id>')
 def book_details(id):
 
@@ -197,6 +229,16 @@ def add_book():
             category,
             quantity,
             filename
+        ))
+
+        conn.commit()
+
+        # SAVE ACTIVITY FIRST
+        cursor.execute("""
+        INSERT INTO activities (activity)
+        VALUES (?)
+        """, (
+        f"New book added: {title}",
         ))
 
         conn.commit()

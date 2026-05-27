@@ -49,10 +49,16 @@ CREATE TABLE IF NOT EXISTS borrow_books (
 )
 ''')
 
+# CREATE ACTIVITIES TABLE
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS activities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
 
 conn.commit()
 conn.close()
-
-
 
 print("Database created successfully!")
