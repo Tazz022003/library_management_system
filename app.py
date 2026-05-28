@@ -370,6 +370,14 @@ def borrow_book(id):
         WHERE id = ?
         """, (new_quantity, id))
 
+        #SAVE ACTIVITY
+        cursor.execute("""
+        INSERT INTO activities (activity)
+        VALUES (?)
+        """,(
+        f"{student_name} borrowed '{book[1]}'",
+        ))
+
         conn.commit()
         conn.close()
 
@@ -466,6 +474,15 @@ def return_book(id):
     WHERE id = ?
     """, (record[2],))
 
+    #SAVE ACTIVITY
+    cursor.execute("""
+     INSERT INTO activities (activity)
+     VALUES (?)
+      """,(
+        f"Book retured: {record[3]}",
+                       
+    ))
+
     conn.commit()
     conn.close()
 
@@ -493,6 +510,14 @@ def register():
             username,
             password,
             'student'
+        ))
+        conn.commit()
+        #SAVE ACTIVITY
+        cursor.execute("""
+         INSERT INTO activities(activity)
+        VALUES(?)
+        """, (
+            f"New member registered: {fullname}",
         ))
 
         conn.commit()
