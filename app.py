@@ -150,14 +150,30 @@ def profile():
 def books():
 
     search = request.args.get('search', '')
+    category = request.args.get('category', '')
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
-    cursor.execute("""
-    SELECT * FROM books
-    WHERE title LIKE ?
-    """, ('%' + search + '%',))
+    if category:
+
+        cursor.execute("""
+        SELECT * FROM books
+        WHERE title LIKE ?
+        AND category = ?
+        """, (
+            '%' + search + '%',
+            category
+        ))
+
+    else:
+
+        cursor.execute("""
+        SELECT * FROM books
+        WHERE title LIKE ?
+        """, (
+            '%' + search + '%',
+        ))
 
     books = cursor.fetchall()
 

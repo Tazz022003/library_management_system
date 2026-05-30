@@ -53,6 +53,17 @@
             border-radius:20px;
             font-size:12px;
         }
+        .table tbody tr{
+         transition:0.3s;
+        }
+
+       .table tbody tr:hover{
+    transform:scale(1.01);
+       }
+
+       .badge-stock{
+       font-size:13px;
+       }
 
     </style>
 
@@ -91,10 +102,12 @@
 
     </div>
 
-    <!-- SEARCH -->
-    <form method="GET" class="mb-4">
+    <!-- SEARCH + FILTER -->
+<form method="GET" class="mb-4">
 
-        <div class="input-group shadow-sm">
+    <div class="row">
+
+        <div class="col-md-8">
 
             <input
                 type="text"
@@ -103,13 +116,60 @@
                 placeholder="Search books..."
             >
 
-            <button class="btn btn-dark">
+        </div>
+
+        <div class="col-md-3">
+
+            <select
+                name="category"
+                class="form-select"
+            >
+
+                <option value="">All Categories</option>
+
+                <option>Fiction</option>
+                <option>Non-Fiction</option>
+                <option>Science</option>
+                <option>Technology</option>
+                <option>Programming</option>
+                <option>Computer Science</option>
+                <option>Mathematics</option>
+                <option>Engineering</option>
+                <option>Education</option>
+                <option>History</option>
+                <option>Biography</option>
+                <option>Business</option>
+                <option>Economics</option>
+                <option>Accounting</option>
+                <option>Marketing</option>
+                <option>Psychology</option>
+                <option>Health & Medicine</option>
+                <option>Religion</option>
+                <option>Philosophy</option>
+                <option>Politics</option>
+                <option>Law</option>
+                <option>Arts</option>
+                <option>Music</option>
+                <option>Sports</option>
+                <option>Travel</option>
+                <option>Reference</option>
+                <option>Children</option>
+
+            </select>
+
+        </div>
+
+        <div class="col-md-1">
+
+            <button class="btn btn-dark w-100">
                 Search
             </button>
 
         </div>
 
-    </form>
+    </div>
+
+</form>
 
     <!-- BOOK TABLE -->
     <div class="card shadow p-4">
@@ -170,8 +230,11 @@
                     <!-- AUTHOR -->
                     <td>{{ book[2] }}</td>
 
-                    <!-- CATEGORY -->
-                    <td>{{ book[3] }}</td>
+                    <td>
+                       <span class="badge bg-info text-dark">
+                         {{ book[3] }}
+                       </span>
+                    </td>
 
                     <!-- QUANTITY -->
                     <td>
