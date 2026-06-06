@@ -64,6 +64,18 @@
        .badge-stock{
        font-size:13px;
        }
+       .card{
+        transition: 3s;
+
+       }
+       .card:hover{
+         Transition:translate(-8px);
+         
+       }
+       .card-img-top{
+            border-top-left-radius:12px;
+            border-top-right-radius:12px;
+         }
 
     </style>
 
@@ -102,66 +114,55 @@
 
     </div>
 
-    <!-- SEARCH + FILTER -->
-<form method="GET" class="mb-4">
+ <form method="GET" class="mb-4">
 
-    <div class="row">
+    <div class="row g-2">
 
-        <div class="col-md-8">
+        <div class="col-md-6">
 
             <input
                 type="text"
                 name="search"
                 class="form-control"
                 placeholder="Search books..."
+                value="{{ request.args.get('search','') }}"
             >
 
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-4">
 
             <select
                 name="category"
                 class="form-select"
             >
 
-                <option value="">All Categories</option>
+                <option value="">
+                    All Categories
+                </option>
 
-                <option>Fiction</option>
-                <option>Non-Fiction</option>
-                <option>Science</option>
-                <option>Technology</option>
-                <option>Programming</option>
-                <option>Computer Science</option>
-                <option>Mathematics</option>
-                <option>Engineering</option>
-                <option>Education</option>
-                <option>History</option>
-                <option>Biography</option>
-                <option>Business</option>
-                <option>Economics</option>
-                <option>Accounting</option>
-                <option>Marketing</option>
-                <option>Psychology</option>
-                <option>Health & Medicine</option>
-                <option>Religion</option>
-                <option>Philosophy</option>
-                <option>Politics</option>
-                <option>Law</option>
-                <option>Arts</option>
-                <option>Music</option>
-                <option>Sports</option>
-                <option>Travel</option>
-                <option>Reference</option>
-                <option>Children</option>
+                {% for category in categories %}
+
+                <option
+                    value="{{ category[0] }}"
+                    {% if selected_category == category[0] %}
+                    selected
+                    {% endif %}
+                >
+                    {{ category[0] }}
+                </option>
+
+                {% endfor %}
 
             </select>
 
         </div>
 
-        <div class="col-md-1">
+        <div class="col-md-2">
 
-            <button class="btn btn-dark w-100">
+            <button
+                class="btn btn-dark w-100"
+            >
                 Search
             </button>
 
@@ -170,140 +171,108 @@
     </div>
 
 </form>
-
     <!-- BOOK TABLE -->
-    <div class="card shadow p-4">
+    <div class="row">
 
-        <table class="table table-hover align-middle">
+    {% for book in books %}
 
-            <thead class="table-dark">
+    <div class="col-md-3 mb-4">
 
-                <tr>
-                    <th>ID</th>
-                    <th>Cover</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Category</th>
-                    <th>Quantity</th>
-                    <th width="220">Actions</th>
-                </tr>
+        <div class="card shadow h-100 border-0">
 
-            </thead>
+            {% if book[5] %}
 
-            <tbody>
+            <img
+                src="{{ url_for('static', filename='uploads/' + book[5]) }}"
+                class="card-img-top"
+                style="
+                    height:300px;
+                    object-fit:cover;
+                "
+            >
 
-                {% for book in books %}
+            {% else %}
 
-                <tr>
+            <img
+                src="https://via.placeholder.com/300x400?text=No+Cover"
+                class="card-img-top"
+                style="
+                    height:300px;
+                    object-fit:cover;
+                "
+            >
 
-                    <!-- ID -->
-                    <td>{{ book[0] }}</td>
+            {% endif %}
 
-                    <!-- COVER -->
-                    <td>
+            <div class="card-body">
 
-                        {% if book[5] %}
+                <h5 class="fw-bold">
+                    {{ book[1] }}
+                </h5>
 
-                        <img
-                            src="{{ url_for('static', filename='uploads/' + book[5]) }}"
-                            width="60"
-                            height="80"
-                        >
+                <p class="text-muted mb-1">
+                    {{ book[2] }}
+                </p>
 
-                        {% else %}
+                <span class="badge bg-primary">
+                    {{ book[3] }}
+                </span>
 
-                        <img
-                            src="https://via.placeholder.com/60x80?text=No+Image"
-                            width="60"
-                            height="80"
-                        >
+                <hr>
 
-                        {% endif %}
+                {% if book[4] > 0 %}
 
-                    </td>
+                <span class="badge bg-success">
+                    {{ book[4] }} Available
+                </span>
 
-                    <!-- TITLE -->
-                    <td class="fw-semibold">
-                        {{ book[1] }}
-                    </td>
+                {% else %}
 
-                    <!-- AUTHOR -->
-                    <td>{{ book[2] }}</td>
+                <span class="badge bg-danger">
+                    Out of Stock
+                </span>
 
-                    <td>
-                       <span class="badge bg-info text-dark">
-                         {{ book[3] }}
-                       </span>
-                    </td>
+                {% endif %}
 
-                    <!-- QUANTITY -->
-                    <td>
+            </div>
 
-                        {% if book[4] > 0 %}
+            <div class="card-footer bg-white border-0">
 
-                        <span class="badge bg-success badge-stock">
-                            {{ book[4] }} Available
-                        </span>
+                {% if book[4] > 0 %}
 
-                        {% else %}
+                <a
+                    href="/borrow_book/{{ book[0] }}"
+                    class="btn btn-primary btn-sm"
+                >
+                    Borrow
+                </a>
 
-                        <span class="badge bg-danger badge-stock">
-                            Out of Stock
-                        </span>
+                {% endif %}
 
-                        {% endif %}
+                <a
+                    href="/edit_book/{{ book[0] }}"
+                    class="btn btn-warning btn-sm"
+                >
+                    Edit
+                </a>
 
-                    </td>
+                <a
+                    href="/delete_book/{{ book[0] }}"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Delete this book?')"
+                >
+                    Delete
+                </a>
 
-                    <!-- ACTIONS -->
-                    <td>
+            </div>
 
-                        {% if book[4] > 0 %}
-
-                        <a
-                           href="/borrow_book/{{ book[0] }}"
-                           class="btn btn-primary btn-sm"
-                        >
-                           Borrow
-                        </a>
-
-                        {% else %}
-
-                        <button
-                            class="btn btn-secondary btn-sm"
-                            disabled
-                        >
-                            Out of Stock
-                        </button>
-
-                        {% endif %}
-
-                        <a
-                            href="/edit_book/{{ book[0] }}"
-                            class="btn btn-warning btn-sm"
-                        >
-                            Edit
-                        </a>
-
-                        <a
-                            href="/delete_book/{{ book[0] }}"
-                            class="btn btn-danger btn-sm"
-                            onclick="return confirm('Delete this book?')"
-                        >
-                            Delete
-                        </a>
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
+        </div>
 
     </div>
+
+    {% endfor %}
+
+</div>
 
 </div>
 

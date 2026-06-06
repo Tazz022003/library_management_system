@@ -91,21 +91,44 @@ def index():
 
     # BORROWED BOOKS
     cursor.execute("""
-    SELECT COUNT(*) FROM borrow_books
+    SELECT COUNT(*)
+    FROM borrow_books
     WHERE status = 'Borrowed'
     """)
     borrowed_books = cursor.fetchone()[0]
 
     # RETURNED BOOKS
     cursor.execute("""
-    SELECT COUNT(*) FROM borrow_books
+    SELECT COUNT(*)
+    FROM borrow_books
     WHERE status = 'Returned'
     """)
     returned_books = cursor.fetchone()[0]
 
+    # OVERDUE BOOKS
+    cursor.execute("""
+    SELECT COUNT(*)
+    FROM borrow_books
+    WHERE status = 'Overdue'
+    """)
+    overdue_books = cursor.fetchone()[0]
+
+    # MONTHLY BORROW STATISTICS
+    cursor.execute("""
+    SELECT
+        strftime('%m', borrow_date) AS month,
+        COUNT(*)
+    FROM borrow_books
+    GROUP BY month
+    ORDER BY month
+    """)
+
+    monthly_data = cursor.fetchall()
+
     # RECENT ACTIVITIES
     cursor.execute("""
-    SELECT * FROM activities
+    SELECT *
+    FROM activities
     ORDER BY id DESC
     LIMIT 5
     """)
@@ -118,9 +141,10 @@ def index():
         total_books=total_books,
         borrowed_books=borrowed_books,
         returned_books=returned_books,
+        overdue_books=overdue_books,
+        monthly_data=monthly_data,
         activities=activities
     )
-
 # ADMIN PROFILE
 @app.route('/profile')
 @login_required
@@ -161,6 +185,7 @@ def books():
         SELECT * FROM books
         WHERE title LIKE ?
         AND category = ?
+        ORDER BY title COLLATE NOCASE ASC
         """, (
             '%' + search + '%',
             category
@@ -171,18 +196,31 @@ def books():
         cursor.execute("""
         SELECT * FROM books
         WHERE title LIKE ?
+        ORDER BY title COLLATE NOCASE ASC
         """, (
             '%' + search + '%',
         ))
 
     books = cursor.fetchall()
 
+    cursor.execute("""
+    SELECT DISTINCT category
+    FROM books
+    ORDER BY category COLLATE NOCASE ASC
+    """)
+
+    categories = cursor.fetchall()
+
     conn.close()
 
     return render_template(
         'books.html',
-        books=books
+        books=books,
+        categories=categories,
+        selected_category=category,
+        search=search
     )
+
 
 @app.route('/book/<int:id>')
 def book_details(id):

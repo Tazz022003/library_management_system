@@ -186,6 +186,9 @@
         .stat-card:hover{
         transform:translateY(-8px);
         }
+        .overdue-card{
+        background:linear-gradient(135deg,#ef4444,#dc2626);
+        }
 
     </style>
 
@@ -261,10 +264,10 @@
     </a>
 
     <!-- DASHBOARD CARDS -->
-<div class="row mb-4">
+<div class="row mb-3">
 
     <!-- TOTAL BOOKS -->
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
 
         <div class="card dashboard-card total-card shadow-lg">
 
@@ -289,7 +292,7 @@
     </div>
 
     <!-- BORROWED -->
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
 
         <div class="card dashboard-card borrow-card shadow-lg">
 
@@ -314,7 +317,7 @@
     </div>
 
     <!-- RETURNED -->
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
 
         <div class="card dashboard-card return-card shadow-lg">
 
@@ -337,12 +340,38 @@
         </div>
 
     </div>
+    <!---OVER DUE-->
+    <!-- OVERDUE -->
+<div class="col-md-3 mb-3">
+
+    <div class="card dashboard-card overdue-card shadow-lg">
+
+        <div class="card-body d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <h6 class="card-title text-white">
+                    ⚠ Overdue Books
+                </h6>
+
+                <h1 class="display-5 fw-bold text-white">
+                    {{ overdue_books }}
+                </h1>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
-    <!-- CHART -->
-    <div class="card shadow-sm p-4 mb-4 chart-card">
 
-        <h4 class="mb-4">
+</div>
+
+    <!-- CHART -->
+    <div class="card shadow-sm p-3 mb-3 chart-card">
+
+        <h4 class="mb-3">
             Library Statistics
         </h4>
 
@@ -351,11 +380,22 @@
         </div>
 
     </div>
+    <div class="card shadow-sm p-3 mb-3 chart-card">
+
+    <h4 class="mb-3">
+        Library Status Distribution
+    </h4>
+
+    <div style="height:250px;">
+        <canvas id="pieChart"></canvas>
+    </div>
+
+</div>
 
     <!-- RECENT ACTIVITIES -->
-    <div class="card shadow-sm p-4 activity-card">
+    <div class="card shadow-sm p-3 activity-card">
 
-        <h4 class="mb-4">
+        <h4 class="mb-3">
             Recent Activities
         </h4>
 
@@ -425,6 +465,35 @@ new Chart(ctx, {
     }
 
 });
+
+const pieCtx =
+document.getElementById('pieChart');
+
+new Chart(pieCtx, {
+
+    type: 'pie',
+
+    data: {
+
+        labels: [
+            'Borrowed',
+            'Returned',
+            'Overdue'
+        ],
+
+        datasets: [{
+
+            data: [
+                {{ borrowed_books }},
+                {{ returned_books }},
+                {{ overdue_books }}
+            ]
+
+        }]
+    }
+
+});
+
 
 </script>
 
