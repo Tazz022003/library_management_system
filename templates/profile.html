@@ -6,57 +6,337 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
         body{
-            background:#f4f6f9;
-        }
+            background:#eef2f7;
+            min-height: 100vh;
 
+        }
+        .container{
+            max-width: 1000px;
+        }
         .profile-card{
-            max-width:500px;
-            margin:auto;
-            margin-top:80px;
-            border-radius:20px;
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-button:20px !important;
+
+        }
+        .profile-header{
+            background:linear-gradient(135deg,#2563eb,#3b82f6);
+            color: white;
+            padding:20px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content:center;
+            align-items:center;
+            text-align: center;
+            padding:40px;
+
+        }
+        .profile-img{
+            width:110px;
+            height: 110px;
+            border-radius: 50%;
+            border:4px solid white;
+            object-fit: cover;
+            background: white;
+            margin-bottom: 10px;
+
+        }
+        .profile-header h2{
+            front-size:38px;
+            margin-bottom: 5px;
+
+        }
+        .profile-header p{
+             margin-buttom:8px;
+
+        }
+        .info-card{
+            border:none;
+            border-radius: 15px;
+            height: 100%;
+            transition: .3s;
+        }
+        .info-card:hover{
+            transform: translateY(-4px);
+
+
+        }
+        .card-header{
+            font-size:22px;
+            font-weight: 600;
+
+        }
+        .card-body{
+            paddding:18px;
+
+        }
+        .form-control{
+            height: 42px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+
+        }
+        .btn{
+            height: 44px;
+            border-radius: 10px;
+            font-weigth:600;
+
+        }
+        .mb-3{
+            margin-bottom: 14px !important;
+        }
+        .mb-4{
+            margin-top: 15px !important;
+
+        }
+        .row{
+            align-items: stretch;
+
+        }
+        @media(max-width:768){
+        .profile-header{
+            padding:25px;
+
+        }
+        .profile-header h2{
+            font-size: 28px;
+
         }
 
-        .profile-img{
-            width:120px;
-            height:120px;
-            border-radius:50%;
-            object-fit:cover;
         }
+
 
     </style>
+    
 
 </head>
 
 <body>
 
-<div class="container">
+<div class="container py-3">
 
-    <div class="card shadow p-4 profile-card text-center">
+    <!-- PROFILE HEADER -->
+    <div class="card shadow-lg profile-card mb-4">
 
-        <img
+        <div class="profile-header">
+
+            {% if user[5] %}
+
+            <img
+            src="{{ url_for('static', filename='uploads/' + user[5]) }}"
+            class="profile-img">
+
+            {% else %}
+
+            <img
             src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            class="profile-img mx-auto mb-3"
-        >
+            class="profile-img">
 
-        <h2>{{ user[1] }}</h2>
+            {% endif %}
 
-        <p class="text-muted">
-            @{{ user[2] }}
-        </p>
+            <h2 class="mt-3 fw-bold">
+                {{ user[1] }}
+            </h2>
 
-        <span class="badge bg-dark mb-3">
-            {{ user[4] }}
-        </span>
+            <p class="mb-2">
+                @{{ user[2] }}
+            </p>
 
-        <div>
-
-            <a href="/" class="btn btn-primary">
-                Back Dashboard
-            </a>
+            <span class="badge bg-light text-dark fs-6 px-3 py-2">
+                {{ user[4] }}
+            </span>
 
         </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- USER INFO -->
+        <div class="col-lg-4">
+
+            <div class="card shadow info-card h-100">
+
+                <div class="card-header bg-primary text-white fw-bold">
+                    User Information
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label class="fw-bold">
+                            Full Name
+                        </label>
+
+                        <input
+                        type="text"
+                        class="form-control"
+                        value="{{ user[1] }}"
+                        readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">
+                            Username
+                        </label>
+
+                        <input
+                        type="text"
+                        class="form-control"
+                        value="{{ user[2] }}"
+                        readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">
+                            Role
+                        </label>
+
+                        <input
+                        type="text"
+                        class="form-control"
+                        value="{{ user[4] }}"
+                        readonly>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CHANGE PASSWORD -->
+        <div class="col-lg-4">
+
+            <div class="card shadow info-card h-100">
+
+                <div class="card-header bg-success text-white fw-bold">
+                    Change Password
+                </div>
+
+                <div class="card-body">
+
+                    <form method="POST" action="/change_password">
+
+                        <div class="mb-3">
+
+                            <label>
+                                Old Password
+                            </label>
+
+                            <input
+                            type="password"
+                            name="old_password"
+                            class="form-control"
+                            required>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label>
+                                New Password
+                            </label>
+
+                            <input
+                            type="password"
+                            name="new_password"
+                            class="form-control"
+                            required>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label>
+                                Confirm Password
+                            </label>
+
+                            <input
+                            type="password"
+                            name="confirm_password"
+                            class="form-control"
+                            required>
+
+                        </div>
+
+                        <button
+                        class="btn btn-success w-100">
+
+                            Update Password
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- UPLOAD PHOTO -->
+        <div class="col-lg-4">
+
+            <div class="card shadow info-card h-100">
+
+                <div class="card-header bg-warning fw-bold">
+                    Upload Profile Picture
+                </div>
+
+                <div class="card-body">
+
+                    <form
+                    action="/upload_profile"
+                    method="POST"
+                    enctype="multipart/form-data">
+
+                        <div class="mb-3">
+
+                            <input
+                            type="file"
+                            name="photo"
+                            class="form-control"
+                            accept="image/*"
+                            required>
+
+                        </div>
+
+                        <button
+                        class="btn btn-warning w-100">
+
+                            Upload Photo
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BACK BUTTON -->
+    <div class="mt-4">
+
+        <a
+        href="/"
+        class="btn btn-dark">
+
+            ← Back to Dashboard
+
+        </a>
 
     </div>
 

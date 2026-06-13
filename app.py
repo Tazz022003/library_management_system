@@ -14,14 +14,13 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = 'library_secret_key'
-
 # LOGIN REQUIRED
 def login_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
-        if 'user' not in session:
+        if 'user_id' not in session:
             return redirect('/login')
 
         return f(*args, **kwargs)
@@ -51,8 +50,9 @@ def login():
         conn.close()
 
         if user:
-
-            session['user'] = user[2]
+            session['user_id'] = user[0] 
+            session['user'] = user [2]
+            session['username'] = user[2]
             session['role'] = user[4]
 
             if user[4] == 'admin':
@@ -67,15 +67,13 @@ def login():
 
     return render_template('login.html')
 
-
 # LOGOUT
 @app.route('/logout')
 def logout():
 
-    session.pop('user', None)
+    session.clear()
 
     return redirect('/login')
-
 
 # DASHBOARD/Index route
 @app.route('/')
@@ -145,6 +143,40 @@ def index():
         monthly_data=monthly_data,
         activities=activities
     )
+@app.route('/upload_profile', methods=['POST'])
+@login_required
+def upload_profile():
+
+    image = request.files['photo']
+
+    if image and image.filename != '':
+
+        filename = secure_filename(image.filename)
+
+        image.save(
+            os.path.join(
+                app.config['UPLOAD_FOLDER'],
+                filename
+            )
+        )
+
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        UPDATE users
+        SET profile_image = ?
+        WHERE id = ?
+        """, (
+            filename,
+            session['user_id']
+        ))
+
+        conn.commit()
+        conn.close()
+
+    return redirect('/profile')
+
 # ADMIN PROFILE
 @app.route('/profile')
 @login_required
@@ -166,7 +198,75 @@ def profile():
         'profile.html',
         user=user
     )
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
 
+    old_password = request.form['old_password']
+    new_password = request.form['new_password']
+    confirm_password = request.form['confirm_password']
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT * FROM users
+    WHERE id = ?
+    """, (session['user_id'],))
+
+    user = cursor.fetchone()
+
+    # CHECK OLD PASSWORD
+    if user[3] != old_password:
+
+        conn.close()
+
+        return """
+        <script>
+        alert('Old password is incorrect!');
+        window.location='/profile';
+        </script>
+        """
+
+    # CHECK CONFIRM PASSWORD
+    if new_password != confirm_password:
+
+        conn.close()
+
+        return """
+        <script>
+        alert('Passwords do not match!');
+        window.location='/profile';
+        </script>
+        """
+
+    # UPDATE PASSWORD
+    cursor.execute("""
+    UPDATE users
+    SET password = ?
+    WHERE id = ?
+    """, (
+        new_password,
+        session['user_id']
+    ))
+
+    # SAVE ACTIVITY
+    cursor.execute("""
+    INSERT INTO activities(activity)
+    VALUES(?)
+    """, (
+        f"Password changed by {user[1]}",
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return """
+    <script>
+    alert('Password updated successfully!');
+    window.location='/profile';
+    </script>
+    """
 
 # DISPLAY BOOKS
 @app.route('/books')
