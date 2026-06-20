@@ -689,17 +689,39 @@ def student_dashboard():
     if session['role'] != 'student':
         return redirect('/')
 
+    search = request.args.get('search', '')
+
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM books")
+    if search:
+
+        cursor.execute("""
+        SELECT *
+        FROM books
+        WHERE
+        title LIKE ?
+        OR author LIKE ?
+        """, (
+            f"%{search}%",
+            f"%{search}%"
+        ))
+
+    else:
+
+        cursor.execute("""
+        SELECT *
+        FROM books
+        """)
+
     books = cursor.fetchall()
 
     conn.close()
 
     return render_template(
         'student_dashboard.html',
-        books=books
+        books=books,
+        search=search
     )
 
 # PDF REPORT
